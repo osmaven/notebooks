@@ -1,0 +1,520 @@
+{
+  "paragraphs": [
+    {
+      "text": "import java.io.DataOutputStream\n\nimport com.amazonaws.services.s3.AmazonS3ClientBuilder\nimport com.amazonaws.services.s3.AmazonS3\nimport com.amazonaws.services.s3.AmazonS3ClientBuilder\nimport com.amazonaws.services.s3.model.S3Object\nimport com.amazonaws.services.s3.model.S3ObjectInputStream\nimport java.util.Properties\n\nimport org.apache.spark.sql.functions._\nimport java.net.{Socket, URI, URL}\n\nimport org.apache.hadoop.fs.FileSystem\nimport org.apache.hadoop.fs.Path\nimport org.apache.spark.sql.{DataFrame, SparkSession}\nimport org.apache.spark.SparkContext\nimport org.apache.spark.SparkConf\nimport org.apache.spark.sql.SaveMode\nimport java.util.Properties\n\nimport org.apache.spark._\nimport java.util.Calendar\n\nimport org.apache.spark.sql.DataFrame\nimport com.amazonaws.auth.InstanceProfileCredentialsProvider\nimport com.amazonaws.services.s3.AmazonS3Client\nimport org.apache.log4j.Logger\nimport com.codahale.metrics.MetricRegistry\nimport org.apache.spark.metrics.source.Source\nimport org.apache.spark.SparkConf\nimport java.io.{FileInputStream, InputStream}\nimport java.net.URL\nimport java.io.DataOutputStream\nimport java.net.Socket",
+      "user": "emolinarivero@hotels.com",
+      "dateUpdated": "Oct 2, 2017 10:54:35 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502876917783_-1634386139",
+      "id": "20170816-094837_559155940",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nimport java.io.DataOutputStream\n\nimport com.amazonaws.services.s3.AmazonS3ClientBuilder\n\nimport com.amazonaws.services.s3.AmazonS3\n\nimport com.amazonaws.services.s3.AmazonS3ClientBuilder\n\nimport com.amazonaws.services.s3.model.S3Object\n\nimport com.amazonaws.services.s3.model.S3ObjectInputStream\n\nimport java.util.Properties\n\nimport org.apache.spark.sql.functions._\n\nimport java.net.{Socket, URI, URL}\n\nimport org.apache.hadoop.fs.FileSystem\n\nimport org.apache.hadoop.fs.Path\n\nimport org.apache.spark.sql.{DataFrame, SparkSession}\n\nimport org.apache.spark.SparkContext\n\nimport org.apache.spark.SparkConf\n\nimport org.apache.spark.sql.SaveMode\n\nimport java.util.Properties\n\nimport org.apache.spark._\n\nimport java.util.Calendar\n\nimport org.apache.spark.sql.DataFrame\n\nimport com.amazonaws.auth.InstanceProfileCredentialsProvider\n\nimport com.amazonaws.services.s3.AmazonS3Client\n\nimport org.apache.log4j.Logger\n\nimport com.codahale.metrics.MetricRegistry\n\nimport org.apache.spark.metrics.source.Source\n\nimport org.apache.spark.SparkConf\n\nimport java.io.{FileInputStream, InputStream}\n\nimport java.net.URL\n\nimport java.io.DataOutputStream\n\nimport java.net.Socket\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:48:37 AM",
+      "dateStarted": "Aug 16, 2017 3:09:52 PM",
+      "dateFinished": "Aug 16, 2017 3:09:57 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": " def GetPropertyFromSparkConf( configuration: SparkConf, KeytoGet: String):String \u003d {\n    val confFile \u003d configuration.get(\"spark.metrics.conf\", null)\n    val prop \u003d new FileInputStream(confFile)\n    val uno \u003d new Properties()\n    uno.load(prop)\n    /*\"*.sink.graphite.host\")*/\n    return (uno.getProperty(KeytoGet))\n  }",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:03 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502876944144_193802717",
+      "id": "20170816-094904_733918550",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nGetPropertyFromSparkConf: (configuration: org.apache.spark.SparkConf, KeytoGet: String)String\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:49:04 AM",
+      "dateStarted": "Aug 16, 2017 3:10:03 PM",
+      "dateFinished": "Aug 16, 2017 3:10:03 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "case class  dbProperties(jdbcUsername: String,\n                          jdbcPassword: String,\n                          jdbcHostname: String,\n                          jdbcPort: String,\n                          thriftServer: String,\n                          dbUrl: String)\n\n  def logs_info ( texto : String): Unit \u003d {\n    val log \u003d Logger.getLogger(getClass.getName)\n    log.info(texto)\n  }",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:06 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502876963352_53384692",
+      "id": "20170816-094923_2119434610",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ndefined class dbProperties\n\nlogs_info: (texto: String)Unit\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:49:23 AM",
+      "dateStarted": "Aug 16, 2017 3:10:06 PM",
+      "dateFinished": "Aug 16, 2017 3:10:07 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "def initproperties(bucket: String, s3key: String): dbProperties \u003d {\n    val s3 \u003d new AmazonS3Client(new InstanceProfileCredentialsProvider)\n    val kk \u003d s3.getObject(bucket, s3key)\n    val prop \u003d new Properties()\n    prop.load(kk.getObjectContent())\n    val mydbproperties \u003d new dbProperties(\n      prop.getProperty(\"spark.qubole.jdbcUsername\"),\n      prop.getProperty(\"spark.qubole.jdbcPassword\"),\n      prop.getProperty(\"spark.qubole.jdbcHostname\"),\n      prop.getProperty(\"spark.qubole.jdbcPort\"),\n      prop.getProperty(\"spark.qubole.thriftServer\"),\n      \"jdbc:sqlserver://\" + prop.getProperty(\"spark.qubole.jdbcHostname\")\n\n    )\n    kk.close()\n    return mydbproperties\n  }",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:10 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502876994140_-1593093769",
+      "id": "20170816-094954_873846717",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ninitproperties: (bucket: String, s3key: String)dbProperties\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:49:54 AM",
+      "dateStarted": "Aug 16, 2017 3:10:10 PM",
+      "dateFinished": "Aug 16, 2017 3:10:10 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "def run(spark: SparkSession,propertiesobject : dbProperties, sqlQuery: String): DataFrame \u003d {\n      logs_info(sqlQuery)\n      logs_info(propertiesobject.dbUrl)\n    try { spark.read\n      .format(\"jdbc\")\n      .option(\"driver\", \"com.microsoft.sqlserver.jdbc.SQLServerDriver\")\n      .option(\"url\", propertiesobject.dbUrl)\n      .option(\"user\", propertiesobject.jdbcUsername)\n      .option(\"password\", propertiesobject.jdbcPassword)\n      .option(\"fetchSize\", \"10000\")\n      .option(\"dbtable\", s\"($sqlQuery) t1\")\n      .load()\n    } catch {\n      case e: Exception \u003d\u003e {\n        logs_info(\"Error executing \" + e.getMessage)\n        throw e\n      }\n    }\n  }",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:12 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502877010250_984754510",
+      "id": "20170816-095010_517593351",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nrun: (spark: org.apache.spark.sql.SparkSession, propertiesobject: dbProperties, sqlQuery: String)org.apache.spark.sql.DataFrame\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:50:10 AM",
+      "dateStarted": "Aug 16, 2017 3:10:12 PM",
+      "dateFinished": "Aug 16, 2017 3:10:13 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": " def getBounds(spark: SparkSession,propertiesobject :dbProperties,table: String, db_name: String, whereClause: String, partitionColumn: String): Array[Long] \u003d {\n    val sql \u003d s\"select min($partitionColumn) as minimo, max($partitionColumn) as maximo from $db_name.$table\"\n    /** if (whereClause.length \u003e 0){\n      * val sql \u003d sql + s\" where $whereClause\"\n      * }\n      */\n    val df \u003d run(spark,propertiesobject,sql).collect()(0)\n    Array(df.get(0).asInstanceOf[Long], df.get(1).asInstanceOf[Long])\n  }",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:16 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502877055889_-428766976",
+      "id": "20170816-095055_1375518612",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ngetBounds: (spark: org.apache.spark.sql.SparkSession, propertiesobject: dbProperties, table: String, db_name: String, whereClause: String, partitionColumn: String)Array[Long]\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:50:55 AM",
+      "dateStarted": "Aug 16, 2017 3:10:16 PM",
+      "dateFinished": "Aug 16, 2017 3:10:16 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "def getTableFields(spark: SparkSession,propertiesobject :dbProperties,table: String, db_name: String): String \u003d {\n    val sql \u003d\n      s\"\"\"\n       |USE $db_name;\n       |SELECT name \n       |FROM sys.all_columns\n       |WHERE object_id in (select object_id from sys.tables where name \u003d $table)\n       \"\"\".\n        stripMargin\n  run(spark,propertiesobject,sql).collect().map(r \u003d\u003e r.getAs[String](\"ColumnName\")).\n\n    mkString(\", \")\n}\n",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:19 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502877095196_-1012218164",
+      "id": "20170816-095135_30736057",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ngetTableFields: (spark: org.apache.spark.sql.SparkSession, propertiesobject: dbProperties, table: String, db_name: String)String\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:51:35 AM",
+      "dateStarted": "Aug 16, 2017 3:10:19 PM",
+      "dateFinished": "Aug 16, 2017 3:10:19 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "def run_main(spark: SparkSession,propertiesobject: dbProperties,table: String, databasename:  String, whereClause: String, partitionColumn: String,\n             numPartitions: Int): DataFrame \u003d {\n  val bounds \u003d getBounds(spark,propertiesobject,table,databasename,  whereClause, partitionColumn)\n  val fields \u003d getTableFields(spark,propertiesobject,table,databasename)\n  val dfs: Array[DataFrame] \u003d new  Array[DataFrame]( numPartitions)\n  val lowerBound \u003d bounds(0)\n  val partitionRange: Long \u003d ((bounds(1) + 1  - bounds(0)) / numPartitions)\n  for (i \u003c- 0 to numPartitions - 2) {\n    dfs(i) \u003d run(spark,propertiesobject,\n      s\"\"\"select $fields from $databasename.$table\n         | where $partitionColumn \u003e\u003d ${lowerBound +\n        (partitionRange * i)} and $partitionColumn \u003c ${lowerBound + (partitionRange * (i + 1))}\"\"\".stripMargin.replace(\"\\n\", \"\"))\n  }\n\n  dfs(numPartitions - 1) \u003d run(spark,propertiesobject,s\"select $fields from $databasename.$table where $partitionColumn \u003e\u003d  ${\n    lowerBound + (partitionRange * (\n      numPartitions - 1))}\")\n  dfs.reduceLeft((res, df) \u003d\u003e res.union(df))\n}\n",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:10:22 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502877115296_1073551596",
+      "id": "20170816-095155_2056637859",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nrun_main: (spark: org.apache.spark.sql.SparkSession, propertiesobject: dbProperties, table: String, databasename: String, whereClause: String, partitionColumn: String, numPartitions: Int)org.apache.spark.sql.DataFrame\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:51:55 AM",
+      "dateStarted": "Aug 16, 2017 3:10:22 PM",
+      "dateFinished": "Aug 16, 2017 3:10:23 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val databaseSource \u003d \"MHOTEL\"\nval tablenameSource \u003d \"CUSTOMER_PROFILE_CHANGE\"\nval partitionExp \u003d \"CustomerProfileChangeId\"\nval tablenameTarget \u003d \"user_tech.cust_profile_sqlserver\"\nval numberPartition \u003d  4\nval cloudEnvironment \u003d \"hcom-data-prod-bix-meta\"",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 18, 2017 10:59:37 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502877139007_-850730895",
+      "id": "20170816-095219_412236665",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ndatabaseSource: String \u003d MHOTEL\n\ntablenameSource: String \u003d CUSTOMER_PROFILE_CHANGE\n\npartitionExp: String \u003d CustomerProfileChangeId\n\ntablenameTarget: String \u003d cust_profile_sqlserver\n\nnumberPartition: Int \u003d 4\n\ncloudEnvironment: String \u003d hcom-data-prod-bix-meta\n"
+      },
+      "dateCreated": "Aug 16, 2017 9:52:19 AM",
+      "dateStarted": "Aug 16, 2017 3:12:38 PM",
+      "dateFinished": "Aug 16, 2017 3:12:39 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val log \u003d Logger.getLogger(getClass.getName)",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:12:01 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502896309831_1296437372",
+      "id": "20170816-151149_1896344948",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nlog: org.apache.log4j.Logger \u003d org.apache.log4j.Logger@53ebb48d\n"
+      },
+      "dateCreated": "Aug 16, 2017 3:11:49 PM",
+      "dateStarted": "Aug 16, 2017 3:12:01 PM",
+      "dateFinished": "Aug 16, 2017 3:12:01 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val propertiesobject \u003d  initproperties(cloudEnvironment, \"tmp/qubolesqlserver.properties\")",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:12:42 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502878922225_513515897",
+      "id": "20170816-102202_1867192428",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\npropertiesobject: dbProperties \u003d dbProperties(EMEA_READ ,marketing ,10.188.250.45,1433,thrift://internal-shared-hive-metastore-elb-550897717.us-west-2.elb.amazonaws.com:9083,jdbc:sqlserver://10.188.250.45)\n"
+      },
+      "dateCreated": "Aug 16, 2017 10:22:02 AM",
+      "dateStarted": "Aug 16, 2017 3:12:42 PM",
+      "dateFinished": "Aug 16, 2017 3:12:42 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val conf \u003d new SparkConf().setAppName(\"QuboleLogsAplication\")\nSystem.setProperty(\"hive.metastore.uris\", propertiesobject.thriftServer);\nSystem.setProperty(\"hive.metastore.execute.setugi\", \"false\")\nval warehouseLocation \u003d \"spark-warehouse\"",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:13:12 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502896337309_1662565083",
+      "id": "20170816-151217_1799964918",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nconf: org.apache.spark.SparkConf \u003d org.apache.spark.SparkConf@46decc89\n\nres13: String \u003d null\n\nres14: String \u003d null\n\nwarehouseLocation: String \u003d spark-warehouse\n"
+      },
+      "dateCreated": "Aug 16, 2017 3:12:17 PM",
+      "dateStarted": "Aug 16, 2017 3:13:12 PM",
+      "dateFinished": "Aug 16, 2017 3:13:12 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val spark \u003d SparkSession.builder().appName(\"tdloader\").config(\"spark.sql.warehouse.dir\", warehouseLocation).enableHiveSupport().getOrCreate()\nval username \u003d propertiesobject.jdbcUsername\nval password \u003d propertiesobject.jdbcPassword",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:13:46 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502896392121_2081849439",
+      "id": "20170816-151312_1725426811",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nspark: org.apache.spark.sql.SparkSession \u003d org.apache.spark.sql.SparkSession@26af4d86\n\nusername: String \u003d \"EMEA_READ \"\n\npassword: String \u003d \"marketing \"\n"
+      },
+      "dateCreated": "Aug 16, 2017 3:13:12 PM",
+      "dateStarted": "Aug 16, 2017 3:13:46 PM",
+      "dateFinished": "Aug 16, 2017 3:13:47 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val rdd6 \u003d run_main(spark,propertiesobject,tablenameSource, databaseSource, \"\", partitionExp, numberPartition)",
+      "user": "sshetty@hotels.com",
+      "dateUpdated": "Aug 16, 2017 3:14:10 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502896426573_-1315452700",
+      "id": "20170816-151346_1313085079",
+      "result": {
+        "code": "ERROR",
+        "type": "TEXT",
+        "msg": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncom.microsoft.sqlserver.jdbc.SQLServerException: The TCP/IP connection to the host 10.188.250.45, port 1433 has failed. Error: \"connect timed out. Verify the connection properties, check that an instance of SQL Server is running on the host and accepting TCP/IP connections at the port, and that no firewall is blocking TCP connections to the port.\".\n  at com.microsoft.sqlserver.jdbc.SQLServerException.makeFromDriverError(SQLServerException.java:170)\n  at com.microsoft.sqlserver.jdbc.SQLServerConnection.connectHelper(SQLServerConnection.java:1049)\n  at com.microsoft.sqlserver.jdbc.SQLServerConnection.login(SQLServerConnection.java:833)\n  at com.microsoft.sqlserver.jdbc.SQLServerConnection.connect(SQLServerConnection.java:716)\n  at com.microsoft.sqlserver.jdbc.SQLServerDriver.connect(SQLServerDriver.java:841)\n  at org.apache.spark.sql.execution.datasources.jdbc.DriverWrapper.connect(DriverWrapper.scala:45)\n  at org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils$$anonfun$createConnectionFactory$2.apply(JdbcUtils.scala:65)\n  at org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils$$anonfun$createConnectionFactory$2.apply(JdbcUtils.scala:56)\n  at org.apache.spark.sql.execution.datasources.jdbc.JDBCRDD$.resolveTable(JDBCRDD.scala:123)\n  at org.apache.spark.sql.execution.datasources.jdbc.JDBCRelation.\u003cinit\u003e(JDBCRelation.scala:117)\n  at org.apache.spark.sql.execution.datasources.jdbc.JdbcRelationProvider.createRelation(JdbcRelationProvider.scala:53)\n  at org.apache.spark.sql.execution.datasources.DataSource.resolveRelation(DataSource.scala:315)\n  at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:149)\n  at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:122)\n  at run(\u003cconsole\u003e:73)\n  at getBounds(\u003cconsole\u003e:70)\n  at run_main(\u003cconsole\u003e:70)\n  ... 50 elided\n"
+      },
+      "dateCreated": "Aug 16, 2017 3:13:46 PM",
+      "dateStarted": "Aug 16, 2017 3:14:10 PM",
+      "dateFinished": "Aug 16, 2017 3:14:25 PM",
+      "status": "ERROR",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1502896450436_-1611293956",
+      "id": "20170816-151410_1990593821",
+      "dateCreated": "Aug 16, 2017 3:14:10 PM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Sql_server_sync",
+  "id": "1NPFHSCJCC1509024362",
+  "angularObjects": {
+    "2CX8NXR5W284781509408450107:shared_process": [],
+    "2CZMF82TA284781509408275486:shared_process": [],
+    "2CX1FUJ2W284781509408275489:shared_process": [],
+    "2CYYJU5TM284781509408275491:shared_process": []
+  },
+  "config": {
+    "isDashboard": false
+  },
+  "info": {},
+  "source": "FCN"
+}
