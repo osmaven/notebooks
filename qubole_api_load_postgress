@@ -1,0 +1,389 @@
+{
+  "paragraphs": [
+    {
+      "title": "Run me First",
+      "text": "\n\nimport com.amazonaws.services.s3.AmazonS3Client\nimport com.amazonaws.auth.InstanceProfileCredentialsProvider\nimport org.apache.spark.SparkConf\nimport java.util.Properties\nimport java.net.{URL, Socket, URI}\nimport org.apache.spark.sql.{DataFrame, SparkSession}\nimport org.apache.spark.rdd.RDD\nimport org.apache.spark.SparkContext\nimport org.apache.spark.SparkConf\nimport java.util.Properties\nimport org.apache.spark.sql.SaveMode\n\ncase class dbProperties(jdbcUsername: String,\n                          jdbcPassword: String,\n                          jdbcHostname: String,\n                          jdbcPort: String,\n                          jdbcDatabase: String,\n                          QuboleToken: String)\ndef initproperties(bucket: String, s3key: String): dbProperties \u003d {\n     val s3 \u003d new AmazonS3Client(new InstanceProfileCredentialsProvider)\n    val kk \u003d s3.getObject(bucket, s3key)\n    val prop \u003d new Properties()\n    prop.load(kk.getObjectContent())\n    val mydbproperties \u003d new dbProperties(\n      prop.getProperty(\"spark.qubole.jdbcUsername\"),\n      prop.getProperty(\"spark.qubole.jdbcPassword\"),\n      prop.getProperty(\"spark.qubole.jdbcHostname\"),\n      prop.getProperty(\"spark.qubole.jdbcPort\"),\n      prop.getProperty(\"spark.qubole.jdbcDatabase\"),\n      prop.getProperty(\"spark.qubole.QuboleToken\")\n    )\n    kk.close();\n   \n    return mydbproperties\n  }\n\ndef readJsonDf(dfToFlat: DataFrame, columname: String, spark: SparkSession) \u003d\n    try {\n      val commands \u003d dfToFlat.select(columname)\n      val nameCol \u003d col(columname)\n      val flattened \u003d commands.withColumn(columname, explode(nameCol))\n      val tablename \u003d columname + \"_flat\"\n      flattened.createOrReplaceTempView(tablename)\n    } catch {\n      case _: Throwable \u003d\u003e println(\"Got some other kind of exception json\")\n    }\n\n\n    \n    def getRddfromURL(urlString: String,\n                    propertyDict: Map[String, String],\n                    sc: SparkContext): RDD[String] \u003d {\n    val url \u003d new URL(urlString).openConnection();\n    propertyDict.keys.foreach { i \u003d\u003e\n      url.setRequestProperty(i, propertyDict(i))\n    }\n    url.setDoInput(true)\n    url.setDoOutput(true)\n    url.setUseCaches(false)\n    val out \u003d url.getInputStream()\n    val scanner \u003d new java.util.Scanner(out)\n    val responseBody \u003d scanner.useDelimiter(\"\\\\A\").next()\n    val rdd: RDD[String] \u003d sc.parallelize(Seq(responseBody))\n    return rdd\n  }\ndef readJsonDf(dfToFlat: DataFrame, columname: String, spark: SparkSession) \u003d\n    try {\n      val commands \u003d dfToFlat.select(columname)\n      val nameCol \u003d col(columname)\n      val flattened \u003d commands.withColumn(columname, explode(nameCol))\n      val tablename \u003d columname + \"_flat\"\n      flattened.createOrReplaceTempView(tablename)\n    } catch {\n      case _: Throwable \u003d\u003e println(\"Got some other kind of exception json\")\n    }\n\ndef runmysql(spark: SparkSession, sqlQuery: String): DataFrame \u003d {\n    try { spark.read\n      .format(\"jdbc\")\n      .option(\"driver\", \"com.mysql.jdbc.Driver\")\n      .option(\"url\",\"jdbc:mysql://rds-cluster-infrastructure-hcomsharedmetastore-1.cdaql20h6pjt.us-west-2.rds.amazonaws.com:3306/hcomsharedmetastore\")\n      .option(\"user\", \"read-only\")\n      .option(\"password\",\"prod-ugZc?aA8M5-t5N.42\")\n      .option(\"fetchSize\", \"10000\")\n      .option(\"dbtable\", s\"($sqlQuery) t1\")\n      .load()\n    } catch {\n      case e: Exception \u003d\u003e {\n        println(\"Error executing \" + e.getMessage)\n        throw e\n      }\n    }\n  }\n\ndef LoadTablepostgress(tablename: String, jdbcUrl: String, df: DataFrame) \u003d\n    try {\n      val connectionProperties \u003d new java.util.Properties()\n      df.write\n        .option(\"driver\", \"org.postgresql.Driver\")\n        .mode(SaveMode.Overwrite)\n        .option(\"truncate\", true)\n        .jdbc(jdbcUrl, tablename, connectionProperties)\n    } catch {\n      case e : Throwable \u003d\u003e println(\"DB\" + e.getMessage)\n    }\n    \nval propertiesobject \u003d\n      initproperties(\"hcom-data-prod-bix-meta\", \"tmp/qubole.properties\")\n      \nval dictionary \u003d Map(\"Accept\" -\u003e \"application/json\",\n                         \"X-AUTH-TOKEN\" -\u003e propertiesobject.QuboleToken)\n                         \nval jdbcUrl \u003d \"jdbc:postgresql://\" + propertiesobject.jdbcHostname + \":\" + propertiesobject.jdbcPort + \"/\" + propertiesobject.jdbcDatabase + \"?user\u003d\" + propertiesobject.jdbcUsername + \"\u0026password\u003d\" + propertiesobject.jdbcPassword\n\ndef runpsql(spark: SparkSession, sqlQuery: String): DataFrame \u003d {\n    try { spark.read\n      .format(\"jdbc\")\n     .option(\"driver\", \"org.postgresql.Driver\")\n      .option(\"url\", jdbcUrl)\n      .option(\"fetchSize\", \"10000\")\n      .option(\"dbtable\", s\"($sqlQuery) t1\")\n      .load()\n    } catch {\n      case e: Exception \u003d\u003e {\n        println(\"Error executing \" + e.getMessage)\n        throw e\n      }\n    }\n  }\n\n    \n    ",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:29 AM",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "tableHide": false,
+        "editorHide": false,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499329332093_-1544735593",
+      "id": "20170706-082212_997092478",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nimport com.amazonaws.services.s3.AmazonS3Client\n\nimport com.amazonaws.auth.InstanceProfileCredentialsProvider\n\nimport org.apache.spark.SparkConf\n\nimport java.util.Properties\n\nimport java.net.{URL, Socket, URI}\n\nimport org.apache.spark.sql.{DataFrame, SparkSession}\n\nimport org.apache.spark.rdd.RDD\n\nimport org.apache.spark.SparkContext\n\nimport org.apache.spark.SparkConf\n\nimport java.util.Properties\n\nimport org.apache.spark.sql.SaveMode\n\ndefined class dbProperties\n\ninitproperties: (bucket: String, s3key: String)dbProperties\n\nreadJsonDf: (dfToFlat: org.apache.spark.sql.DataFrame, columname: String, spark: org.apache.spark.sql.SparkSession)Unit\n\ngetRddfromURL: (urlString: String, propertyDict: Map[String,String], sc: org.apache.spark.SparkContext)org.apache.spark.rdd.RDD[String]\n\nreadJsonDf: (dfToFlat: org.apache.spark.sql.DataFrame, columname: String, spark: org.apache.spark.sql.SparkSession)Unit\n\nrunmysql: (spark: org.apache.spark.sql.SparkSession, sqlQuery: String)org.apache.spark.sql.DataFrame\n\nLoadTablepostgress: (tablename: String, jdbcUrl: String, df: org.apache.spark.sql.DataFrame)Unit\n\npropertiesobject: dbProperties \u003d dbProperties(bixqubole,bixqubole123,hcom-data-prod-bix-qubole-logs-postgress.cdaql20h6pjt.us-west-2.rds.amazonaws.com,5432,bixqubole,ZunTpwQZyRnKyqk3JyyebPzAHPyohsQX3ygdqjGV4ZUdVyV94aDdMpHh8bWsf6po)\n\ndictionary: scala.collection.immutable.Map[String,String] \u003d Map(Accept -\u003e application/json, X-AUTH-TOKEN -\u003e ZunTpwQZyRnKyqk3JyyebPzAHPyohsQX3ygdqjGV4ZUdVyV94aDdMpHh8bWsf6po)\n\njdbcUrl: String \u003d jdbc:postgresql://hcom-data-prod-bix-qubole-logs-postgress.cdaql20h6pjt.us-west-2.rds.amazonaws.com:5432/bixqubole?user\u003dbixqubole\u0026password\u003dbixqubole123\n\nrunpsql: (spark: org.apache.spark.sql.SparkSession, sqlQuery: String)org.apache.spark.sql.DataFrame\n"
+      },
+      "dateCreated": "Jul 6, 2017 8:22:12 AM",
+      "dateStarted": "Oct 30, 2017 6:00:00 PM",
+      "dateFinished": "Oct 30, 2017 6:00:24 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "CPU_QUERY",
+      "text": "\n val allcomands \u003d getRddfromURL(\n      \"https://api.qubole.com/api/v1.2/reports/all_commands?start_date\u003d2016-04-10\u0026end_date\u003d2017-11-10\",\n      dictionary,\n      sc)\nval dfallcomands \u003d sqlContext.read.json(allcomands)\nval cpudf \u003ddfallcomands.select( explode($\"queries\")).select($\"col.id\",$\"col.cpu\",$\"col.submitted_by\",$\"col.fs_bytes_read\",$\"col.command_type\")\nLoadTablepostgress(\"hcom_qubole_cpu_query\", jdbcUrl, cpudf)",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:29 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1507548650469_-39688444",
+      "id": "20171009-113050_1912699812",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nallcomands: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[24] at parallelize at \u003cconsole\u003e:320\n\nwarning: there was one deprecation warning; re-run with -deprecation for details\n\ndfallcomands: org.apache.spark.sql.DataFrame \u003d [end_date: string, queries: array\u003cstruct\u003ccommand_summary:string,command_type:string,cpu:double,created_at:string,end_time:string,fs_bytes_read:double,fs_bytes_written:double,id:bigint,label:string,status:string,submitted_by:string,tags:string\u003e\u003e ... 2 more fields]\n\ncpudf: org.apache.spark.sql.DataFrame \u003d [id: bigint, cpu: double ... 3 more fields]\n"
+      },
+      "dateCreated": "Oct 9, 2017 11:30:50 AM",
+      "dateStarted": "Oct 30, 2017 6:00:24 PM",
+      "dateFinished": "Oct 30, 2017 6:00:56 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "LOGS_LOADING",
+      "text": " val logsQueries1 \u003d getRddfromURL(\n      \"https://api.qubole.com/api/latest/commands?page\u003d1\u0026per_page\u003d8000\u0026all_users\u003d1\",\n      dictionary,\n      sc)\n      val logsQueries2 \u003d getRddfromURL(\n      \"https://api.qubole.com/api/latest/commands?page\u003d2\u0026per_page\u003d8000\u0026all_users\u003d1\",\n      dictionary,\n      sc)\n       val logsQueries3 \u003d getRddfromURL(\n      \"https://api.qubole.com/api/latest/commands?page\u003d3\u0026per_page\u003d8000\u0026all_users\u003d1\",\n      dictionary,\n      sc)\n       val logsQueries4 \u003d getRddfromURL(\n      \"https://api.qubole.com/api/latest/commands?page\u003d4\u0026per_page\u003d8000\u0026all_users\u003d1\",\n      dictionary,\n      sc)\n      \nval logsQueries \u003d logsQueries1.union(logsQueries2).union(logsQueries3).union(logsQueries4)\nval dflogsQueries \u003d sqlContext.read.json(logsQueries)\nreadJsonDf(dflogsQueries, \"commands\", spark)\nval results \u003d spark.sql(\n      \"\"\"SELECT\n          commands.id,\n          commands.user_id,\n          from_unixtime(commands.submit_time,\u0027YYYY-MM-dd HH:mm:ss\u0027) as submit_time,\n          from_unixtime(commands.start_time,\u0027YYYY-MM-dd HH:mm:ss\u0027) as start_time,\n          from_unixtime(commands.end_time,\u0027YYYY-MM-dd HH:mm:ss\u0027) as endtime,\n          commands.end_time - commands.start_time as duration,\n          commands.timeout,\n          commands.status,\n          commands.instance,\n          commands.progress,\n          commands.account_id,\n          commands.can_notify,\n          commands.command_source,\n          commands.command_type,\n          commands.created_at,\n          commands.label,\n          commands.name,\n          commands.num_result_dir,\n          commands.path,\n          commands.perms,\n          commands.pid,\n          commands.pool,\n          commands.qbol_session_id,\n          commands.resolved_macros,\n          commands.saved_query_mutable_id,\n          commands.template,\n          commands.uid,\n          commands.updated_at,\n           regexp_replace(commands.command.query, \u0027\\\\n\u0027, \u0027\u0027) as query\n          from commands_flat\n         \"\"\")\nLoadTablepostgress(\"hcom_logs_queries\", jdbcUrl, results)",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "editorHide": false,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499329965068_-75166355",
+      "id": "20170706-083245_192542013",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nlogsQueries1: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[39] at parallelize at \u003cconsole\u003e:320\n\nlogsQueries2: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[40] at parallelize at \u003cconsole\u003e:320\n\nlogsQueries3: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[41] at parallelize at \u003cconsole\u003e:320\n\nlogsQueries4: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[42] at parallelize at \u003cconsole\u003e:320\n\nlogsQueries: org.apache.spark.rdd.RDD[String] \u003d UnionRDD[45] at union at \u003cconsole\u003e:343\n\nwarning: there was one deprecation warning; re-run with -deprecation for details\ndflogsQueries: org.apache.spark.sql.DataFrame \u003d [commands: array\u003cstruct\u003caccount_id:bigint,can_notify:boolean,command:struct\u003capp_id:bigint,approx_aggregations:boolean,approx_mode:boolean,archives:string,arguments:string,cmdline:string,files:string,inline:string,language:string,loader_stable:bigint,loader_table_name:string,md_cmd:boolean,note_id:string,parameters:string,program:string,query:string,sample:boolean,sample_size:bigint,script_location:string,sql:string,sub_command:string,sub_command_args:string,sub_commands:array\u003cstruct\u003ccommand:struct\u003capprox_aggregations:boolean,approx_mode:boolean,loader_stable:string,loader_table_name:string,md_cmd:boolean,query:string,retry:bigint,sample:boolean,script_location:string\u003e,command_type:string,end_time:bigint,id:bigint,pid:bigint,sequence_number...\nresults: org.apache.spark.sql.DataFrame \u003d [id: bigint, user_id: bigint ... 27 more fields]\n"
+      },
+      "dateCreated": "Jul 6, 2017 8:32:45 AM",
+      "dateStarted": "Oct 30, 2017 6:00:57 PM",
+      "dateFinished": "Oct 30, 2017 6:04:55 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "CLUSTER_REPORT",
+      "text": " val logsCluster \u003d getRddfromURL(\"https://api.qubole.com/api/v1.2/reports/cluster_usage_report\",\n      dictionary,\n      sc)\n val dflogsCluster \u003d sqlContext.read.json(logsCluster)\nreadJsonDf(dflogsCluster, \"cluster_usage\", spark)\n\nval ClusterUSage \u003d spark.sql(\"\"\" select cluster_usage.cluster_id,cluster_usage.cluster_inst_id,cluster_usage.end_time,\ncluster_usage.on_demand_nodes,cluster_usage.qcuh,cluster_usage.spot_nodes,\ncluster_usage.start_time,cluster_usage.tags,regexp_replace(cluster_usage.terminate_reason, \u0027\\\\n\u0027, \u0027\u0027) as terminate_reason from cluster_usage_flat\"\"\")\nLoadTablepostgress(\"hcom_cluster_usage\", jdbcUrl, ClusterUSage)\n      ",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499330044171_1506810564",
+      "id": "20170706-083404_910338929",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nlogsCluster: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[60] at parallelize at \u003cconsole\u003e:320\n\nwarning: there was one deprecation warning; re-run with -deprecation for details\n\ndflogsCluster: org.apache.spark.sql.DataFrame \u003d [cluster_usage: array\u003cstruct\u003ccluster_id:bigint,cluster_inst_id:bigint,end_time:string,on_demand_nodes:bigint,qcuh:bigint,spot_nodes:bigint,start_time:string,tags:string,terminate_reason:string\u003e\u003e, end_date: string ... 1 more field]\n\nClusterUSage: org.apache.spark.sql.DataFrame \u003d [cluster_id: bigint, cluster_inst_id: bigint ... 7 more fields]\n"
+      },
+      "dateCreated": "Jul 6, 2017 8:34:04 AM",
+      "dateStarted": "Oct 30, 2017 6:04:56 PM",
+      "dateFinished": "Oct 30, 2017 6:05:06 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "USERS_LOADING",
+      "text": "val LogsUSers \u003d getRddfromURL(\n      \"https://api.qubole.com/api/latest/accounts/get_users\",\n      dictionary,\n      sc)\n    val dfLogsUSers \u003d sqlContext.read.json(LogsUSers)\n    readJsonDf(dfLogsUSers, \"users\", spark)\nval user_df \u003d\n      spark.sql(\"\"\"SELECT\n          users.email,\n          regexp_replace(users.email,\u0027hotels\u0027,\u0027expedia\u0027) as hotel_email,\n          users.user_id,\n          users.last_login,\n          users.id\n          from users_flat\n                \t\t  \"\"\")\nLoadTablepostgress(\"hcom_users\", jdbcUrl, user_df)",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499330460995_1446420311",
+      "id": "20170706-084100_93717483",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nLogsUSers: org.apache.spark.rdd.RDD[String] \u003d ParallelCollectionRDD[75] at parallelize at \u003cconsole\u003e:320\n\nwarning: there was one deprecation warning; re-run with -deprecation for details\n\ndfLogsUSers: org.apache.spark.sql.DataFrame \u003d [users: array\u003cstruct\u003cdisabled:boolean,email:string,groups:array\u003cstruct\u003cid:bigint,name:string,source:string\u003e\u003e,id:bigint,is_admin:boolean,last_login:string,name:string,user_id:bigint\u003e\u003e]\n\nuser_df: org.apache.spark.sql.DataFrame \u003d [email: string, hotel_email: string ... 3 more fields]\n"
+      },
+      "dateCreated": "Jul 6, 2017 8:41:00 AM",
+      "dateStarted": "Oct 30, 2017 6:05:07 PM",
+      "dateFinished": "Oct 30, 2017 6:05:17 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "METADATA_LOGS",
+      "text": "val totallist \u003d runmysql(spark,\"\"\"select DBS.NAME,TBLS.TBL_NAME,SDS.LOCATION, SDS.INPUT_FORMAT\nfrom TBLS\ninner JOIN DBS\non DBS.DB_ID \u003d TBLS.DB_ID\nINNER JOIN SDS\non\nTBLS.SD_ID \u003d SDS.SD_ID\"\"\" )\n\n\nLoadTablepostgress(\"hcom_metadata\", jdbcUrl, totallist)",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499348168145_-300969549",
+      "id": "20170706-133608_659109999",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ntotallist: org.apache.spark.sql.DataFrame \u003d [NAME: string, TBL_NAME: string ... 2 more fields]\n"
+      },
+      "dateCreated": "Jul 6, 2017 1:36:08 PM",
+      "dateStarted": "Oct 30, 2017 6:05:17 PM",
+      "dateFinished": "Oct 30, 2017 6:05:21 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "CloudHealth",
+      "text": "%pyspark\n\n\nimport urlparse\nimport urllib2\nimport json\n#https://chapi.cloudhealthtech.com/olap_reports/custom/2405181688898\n\nAPI_ENDPOINT \u003d \"https://chapi.cloudhealthtech.com/olap_reports/\"\nAPI_KEY \u003d \"b6ade2e4-e822-4d3a-8149-b06c090b8e63\"\n\n# Returns json for requested report.\ndef get_report(report, api_key):\n  uri \u003d urlparse.urljoin(API_ENDPOINT, report)\n  uri +\u003d \"?api_key\u003d%s\" % API_KEY\n  request  \u003d urllib2.Request(uri, headers\u003d{\"Accept\" : \"application/json\"})\n  response \u003d urllib2.urlopen(request)\n  page \u003d response.read()\n  return json.loads(page)\n\n# Fetch the json for the report\ntry:\n  mylst \u003d []\n  mylst_header \u003d []\n  data \u003d get_report(\"custom/2405181688911\", API_KEY)\n\n  # Get list of dimension names\n  dimensions \u003d [dim.keys()[0] for dim in data[\"dimensions\"]]\n\n  # Output a CSV for this report\n  print \"Month,%s\" % \",\".join( [member[\"label\"] for member in data[\u0027dimensions\u0027][1][dimensions[1]]])\n  mylst_header.append([\"Day\"] + ( [member[\"label\"] for member in data[\u0027dimensions\u0027][1][dimensions[1]]]))\n  index \u003d 0\n  for month in data[\"dimensions\"][0][dimensions[0]]:\n    row \u003d data[\u0027data\u0027][index]\n    if row \u003d\u003d None:\n      continue\n\n    # We have only selected 1 measure so just take first element of every array\n    row_as_array \u003d [str(item[0]) for item in row]\n    #print \"%s,%s\" % (month[\"label\"], \"|\".join(row_as_array))\n    #print type(row_as_array)\n    #print (month[\"label\"])\n    index+\u003d1\n    mylst.append([month[\"label\"]] + row_as_array)\nexcept urllib2.HTTPError as e:\n  print e.code\n  print e.read()\n#print(mylst)\n#sqlContext.createDataFrame(mylst).collect()\ndf \u003d spark.sparkContext.parallelize(mylst).toDF()\nprint(type(mylst))\nz.put(\"mylst_header\", mylst_header)\ndf_header \u003d spark.sparkContext.parallelize(mylst_header).toDF()\ndf.createOrReplaceTempView(\"data\")\ndf_header.createOrReplaceTempView(\"header\")\n",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1505344359349_822701181",
+      "id": "20170913-231239_1824418925",
+      "result": {
+        "code": "ERROR",
+        "type": "TEXT",
+        "msg": "/usr/lib/spark/python/pyspark/context.py:195: UserWarning: Support for Python 2.6 is deprecated as of Spark 2.0.0\n  warnings.warn(\"Support for Python 2.6 is deprecated as of Spark 2.0.0\")\nMonth,Total,Assets Not Allocated,ean-edw,BDP,Data-Science,PULSE,EAN,SURE,Hrum,Pulse,AWD,Customer Operations: Agent Tools,Customer Operations: Data and Customer Interactions,DCI Zelda,Infrastructure,INFRA,ECP_GCP,omnihub,BIX,AMDE,ARCH,CML,HACK,ROAD,amde,sem-tools,CORT,TMS,BID,QA,DOPS,APAC SEM,IVECO,CDS,SEO,EPAM,EGP,RUNP,Advanced-Analytics-Platform,Qubole,SEMTOOLS,BIX-QUBOLE,BIX-QUBOLE-ETL,PAWS,HRUM,SHP,PERF,Perf,paws,egpa-ibi@expedia.com,Marketing Microsites,Data Infrastructure,coe tools,Traffic Engineering,LDT-Core Data,EDE,Affinity,LodgingSort,LPS,Platform,Watson,AWS Cost Transparency,LUIS,EWE Cloud Team,CAT,meta,AirTeam,EpsConnectivityBNE,EPCMobile,air,ALPS,DCI,SEM-TOOLS,SEM,DSP,HACK-194,HDE,APO-SQLSTREAM,APO-QUBOLE,APO-QUBOLE-ETL,BIDA,SHP-Bandits,HACK-204,EgenciaDataScience@expedia.com,Egencia Data Science,devops engineering,EPC,EPC Champ,egea-tech@expedia.com,APO,hde,HCOM_PAWS,Unused\nTraceback (most recent call last):\n  File \"/tmp/zeppelin_pyspark-6820019295132978714.py\", line 279, in \u003cmodule\u003e\n    raise Exception(traceback.format_exc())\nException: Traceback (most recent call last):\n  File \"/tmp/zeppelin_pyspark-6820019295132978714.py\", line 272, in \u003cmodule\u003e\n    exec(code)\n  File \"\u003cstdin\u003e\", line 31, in \u003cmodule\u003e\n  File \"/usr/lib/spark/python/pyspark/sql/session.py\", line 57, in toDF\n    return sparkSession.createDataFrame(self, schema, sampleRatio)\n  File \"/usr/lib/spark/python/pyspark/sql/session.py\", line 535, in createDataFrame\n    rdd, schema \u003d self._createFromRDD(data.map(prepare), schema, samplingRatio)\n  File \"/usr/lib/spark/python/pyspark/sql/session.py\", line 375, in _createFromRDD\n    struct \u003d self._inferSchema(rdd, samplingRatio)\n  File \"/usr/lib/spark/python/pyspark/sql/session.py\", line 346, in _inferSchema\n    first \u003d rdd.first()\n  File \"/usr/lib/spark/python/pyspark/rdd.py\", line 1361, in first\n    rs \u003d self.take(1)\n  File \"/usr/lib/spark/python/pyspark/rdd.py\", line 1343, in take\n    res \u003d self.context.runJob(self, takeUpToNumLeft, p)\n  File \"/usr/lib/spark/python/pyspark/context.py\", line 992, in runJob\n    port \u003d self._jvm.PythonRDD.runJob(self._jsc.sc(), mappedRDD._jrdd, partitions)\n  File \"/usr/lib/spark/python/lib/py4j-0.10.4-src.zip/py4j/java_gateway.py\", line 1133, in __call__\n    answer, self.gateway_client, self.target_id, self.name)\n  File \"/usr/lib/spark/python/pyspark/sql/utils.py\", line 63, in deco\n    return f(*a, **kw)\n  File \"/usr/lib/spark/python/lib/py4j-0.10.4-src.zip/py4j/protocol.py\", line 319, in get_return_value\n    format(target_id, \".\", name), value)\nPy4JJavaError: An error occurred while calling z:org.apache.spark.api.python.PythonRDD.runJob.\n: org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 19.0 failed 4 times, most recent failure: Lost task 0.3 in stage 19.0 (TID 670, 10.27.131.53, executor 15): org.apache.spark.api.python.PythonException: Traceback (most recent call last):\n  File \"/usr/lib/spark/python/pyspark/worker.py\", line 123, in main\n    (\"%d.%d\" % sys.version_info[:2], version))\nException: Python in worker has different version 2.7 than that in driver 2.6, PySpark cannot run with different minor versions.Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.\n\n\tat org.apache.spark.api.python.PythonRunner$$anon$1.read(PythonRDD.scala:193)\n\tat org.apache.spark.api.python.PythonRunner$$anon$1.\u003cinit\u003e(PythonRDD.scala:234)\n\tat org.apache.spark.api.python.PythonRunner.compute(PythonRDD.scala:152)\n\tat org.apache.spark.api.python.PythonRDD.compute(PythonRDD.scala:63)\n\tat org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:323)\n\tat org.apache.spark.rdd.RDD.iterator(RDD.scala:287)\n\tat org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:87)\n\tat org.apache.spark.scheduler.Task.run(Task.scala:108)\n\tat org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:335)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n\tat java.lang.Thread.run(Thread.java:745)\n\nDriver stacktrace:\n\tat org.apache.spark.scheduler.DAGScheduler.org$apache$spark$scheduler$DAGScheduler$$failJobAndIndependentStages(DAGScheduler.scala:1525)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1513)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1512)\n\tat scala.collection.mutable.ResizableArray$class.foreach(ResizableArray.scala:59)\n\tat scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:48)\n\tat org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:1512)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:840)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:840)\n\tat scala.Option.foreach(Option.scala:257)\n\tat org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:840)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:1740)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1695)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1684)\n\tat org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:48)\n\tat org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:635)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:2231)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:2252)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:2271)\n\tat org.apache.spark.api.python.PythonRDD$.runJob(PythonRDD.scala:446)\n\tat org.apache.spark.api.python.PythonRDD.runJob(PythonRDD.scala)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:497)\n\tat py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)\n\tat py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:357)\n\tat py4j.Gateway.invoke(Gateway.java:280)\n\tat py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)\n\tat py4j.commands.CallCommand.execute(CallCommand.java:79)\n\tat py4j.GatewayConnection.run(GatewayConnection.java:214)\n\tat java.lang.Thread.run(Thread.java:745)\nCaused by: org.apache.spark.api.python.PythonException: Traceback (most recent call last):\n  File \"/usr/lib/spark/python/pyspark/worker.py\", line 123, in main\n    (\"%d.%d\" % sys.version_info[:2], version))\nException: Python in worker has different version 2.7 than that in driver 2.6, PySpark cannot run with different minor versions.Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.\n\n\tat org.apache.spark.api.python.PythonRunner$$anon$1.read(PythonRDD.scala:193)\n\tat org.apache.spark.api.python.PythonRunner$$anon$1.\u003cinit\u003e(PythonRDD.scala:234)\n\tat org.apache.spark.api.python.PythonRunner.compute(PythonRDD.scala:152)\n\tat org.apache.spark.api.python.PythonRDD.compute(PythonRDD.scala:63)\n\tat org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:323)\n\tat org.apache.spark.rdd.RDD.iterator(RDD.scala:287)\n\tat org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:87)\n\tat org.apache.spark.scheduler.Task.run(Task.scala:108)\n\tat org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:335)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n\t... 1 more\n\n\n"
+      },
+      "dateCreated": "Sep 13, 2017 11:12:39 PM",
+      "dateStarted": "Oct 30, 2017 6:05:22 PM",
+      "dateFinished": "Oct 30, 2017 6:05:32 PM",
+      "status": "ERROR",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val t1\u003d spark.sql(\"select * from header\")\nval data \u003d  spark.sql(\"\"\"select to_date(_1,\u0027yyyy-mm-dd\u0027) as _1,\ncast(_42 as int),\ncast(_44 as int),\ncast(_45 as int) ,\ncast(_80 as int) ,\ncast(_81 as int),\ncast(_82 as int) from data  where _1 \u003c\u003e\u0027Total\u0027  \"\"\")\nval newNames \u003d Seq(\"period\", \"Qubole\",\"BIX-QUBOLE\",\"BIX-QUBOLE-ETL\",\"APO-SQLSTREAM\",\"APO-QUBOLE\",\"APO-QUBOLE-ETL\")\nval QuboledfCost \u003d data.select(\"_1\",\"_42\",\"_44\",\"_45\",\"_80\",\"_81\",\"_82\").toDF(newNames: _*)\nLoadTablepostgress(\"hcom_cloudhealth_qubole\", jdbcUrl, QuboledfCost)",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1508325140116_-1348885692",
+      "id": "20171018-111220_994306986",
+      "result": {
+        "code": "ERROR",
+        "type": "TEXT",
+        "msg": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\norg.apache.spark.sql.AnalysisException: Table or view not found: header; line 1 pos 14\n  at org.apache.spark.sql.catalyst.analysis.package$AnalysisErrorAt.failAnalysis(package.scala:42)\n  at org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveRelations$.org$apache$spark$sql$catalyst$analysis$Analyzer$ResolveRelations$$lookupTableFromCatalog(Analyzer.scala:643)\n  at org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveRelations$.resolveRelation(Analyzer.scala:595)\n  at org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveRelations$$anonfun$apply$8.applyOrElse(Analyzer.scala:625)\n  at org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveRelations$$anonfun$apply$8.applyOrElse(Analyzer.scala:618)\n  at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan$$anonfun$resolveOperators$1.apply(LogicalPlan.scala:62)\n  at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan$$anonfun$resolveOperators$1.apply(LogicalPlan.scala:62)\n  at org.apache.spark.sql.catalyst.trees.CurrentOrigin$.withOrigin(TreeNode.scala:70)\n  at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.resolveOperators(LogicalPlan.scala:61)\n  at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan$$anonfun$1.apply(LogicalPlan.scala:59)\n  at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan$$anonfun$1.apply(LogicalPlan.scala:59)\n  at org.apache.spark.sql.catalyst.trees.TreeNode$$anonfun$4.apply(TreeNode.scala:306)\n  at org.apache.spark.sql.catalyst.trees.TreeNode.mapProductIterator(TreeNode.scala:187)\n  at org.apache.spark.sql.catalyst.trees.TreeNode.mapChildren(TreeNode.scala:304)\n  at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.resolveOperators(LogicalPlan.scala:59)\n  at org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveRelations$.apply(Analyzer.scala:618)\n  at org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveRelations$.apply(Analyzer.scala:564)\n  at org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1$$anonfun$apply$1.apply(RuleExecutor.scala:85)\n  at org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1$$anonfun$apply$1.apply(RuleExecutor.scala:82)\n  at scala.collection.LinearSeqOptimized$class.foldLeft(LinearSeqOptimized.scala:124)\n  at scala.collection.immutable.List.foldLeft(List.scala:84)\n  at org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1.apply(RuleExecutor.scala:82)\n  at org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1.apply(RuleExecutor.scala:74)\n  at scala.collection.immutable.List.foreach(List.scala:381)\n  at org.apache.spark.sql.catalyst.rules.RuleExecutor.execute(RuleExecutor.scala:74)\n  at org.apache.spark.sql.execution.QueryExecution.analyzed$lzycompute(QueryExecution.scala:69)\n  at org.apache.spark.sql.execution.QueryExecution.analyzed(QueryExecution.scala:67)\n  at org.apache.spark.sql.execution.QueryExecution.assertAnalyzed(QueryExecution.scala:50)\n  at org.apache.spark.sql.Dataset$.ofRows(Dataset.scala:66)\n  at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:624)\n  ... 180 elided\n"
+      },
+      "dateCreated": "Oct 18, 2017 11:12:20 AM",
+      "dateStarted": "Oct 30, 2017 6:05:31 PM",
+      "dateFinished": "Oct 30, 2017 6:05:35 PM",
+      "status": "ERROR",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "DSP_report",
+      "text": " val dsp_name \u003d Seq(\"user_name\", \"start_time\",\"queries\",\"media_minutos\")\n val dspdf \u003d spark.read\n         .format(\"csv\")\n         .option(\"header\", \"true\") //reading the headers\n         .option(\"mode\", \"DROPMALFORMED\")\n         .load(\"s3://hcom-data-prod-users/user_tech/dsp_report/table.csv\")\n         .toDF(dsp_name: _*)\ndspdf.createOrReplaceTempView(\"dsp_report\")\nLoadTablepostgress(\"hcom_dsp_report\", jdbcUrl, spark.sql(\"\"\"select concat(user_name ,\u0027@expedia.com\u0027) as user_name, \nto_date(from_unixtime( start_time/1000)) as start_date,cast(queries as int) as num_queries,cast (media_minutos as int) as avg_min\nfrom dsp_report\"\"\" ))\n",
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1508753878759_1620969014",
+      "id": "20171023-101758_1310506128",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\ndsp_name: Seq[String] \u003d List(user_name, start_time, queries, media_minutos)\n\ndspdf: org.apache.spark.sql.DataFrame \u003d [user_name: string, start_time: string ... 2 more fields]\n"
+      },
+      "dateCreated": "Oct 23, 2017 10:17:58 AM",
+      "dateStarted": "Oct 30, 2017 6:05:35 PM",
+      "dateFinished": "Oct 30, 2017 6:05:47 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "user": "24404",
+      "dateUpdated": "Oct 25, 2017 9:59:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1508752663479_-852324443",
+      "id": "20171023-095743_2016399025",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Oct 23, 2017 9:57:43 AM",
+      "dateStarted": "Oct 30, 2017 6:05:47 PM",
+      "dateFinished": "Oct 30, 2017 6:05:53 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "qubole_api_load_postgress",
+  "id": "EVAJJ125YZ1507820121",
+  "angularObjects": {
+    "2CX8NXR5W284781509408450107:shared_process": [],
+    "2CZMF82TA284781509408275486:shared_process": [],
+    "2CX1FUJ2W284781509408275489:shared_process": [],
+    "2CYYJU5TM284781509408275491:shared_process": []
+  },
+  "config": {
+    "isDashboard": false,
+    "looknfeel": "default",
+    "cron": "0 0 6,12,18 ? * MON,TUE,WED,THU,FRI  *",
+    "cronExecutingUser": "24404",
+    "cron_updated_by_useremail": "omateosventura@hotels.com"
+  },
+  "info": {},
+  "source": "FCN"
+}
