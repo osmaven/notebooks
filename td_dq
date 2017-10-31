@@ -1,0 +1,178 @@
+{
+  "paragraphs": [
+    {
+      "title": "Run me first",
+      "text": "import com.amazonaws.services.s3.AmazonS3Client\nimport com.amazonaws.auth.InstanceProfileCredentialsProvider\nimport org.apache.spark.SparkConf\nimport java.util.Properties\nimport java.net.{URL, Socket, URI}\nimport org.apache.spark.sql.{DataFrame, SparkSession}\nimport org.apache.spark.rdd.RDD\nimport org.apache.spark.SparkContext\nimport org.apache.spark.SparkConf\nval kk1 \u003d spark.sql(\"\"\"set spark.sql.hive.convertMetastoreParquet\u003dfalse\"\"\")\n\n  case class dbProperties(jdbcUsername: String,\n                          jdbcPassword: String,\n                          jdbcHostname: String,\n                          jdbcPort: String,\n                          thriftServer: String,\n                          dbUrl: String)\ndef initproperties(bucket: String, s3key: String): dbProperties \u003d {\n    val s3 \u003d new AmazonS3Client(new InstanceProfileCredentialsProvider)\n    val kk \u003d s3.getObject(bucket, s3key)\n    val prop \u003d new Properties()\n    prop.load(kk.getObjectContent())\n    val mydbproperties \u003d new dbProperties(\n      prop.getProperty(\"spark.qubole.jdbcUsername\"),\n      prop.getProperty(\"spark.qubole.jdbcPassword\"),\n      prop.getProperty(\"spark.qubole.jdbcHostname\"),\n      prop.getProperty(\"spark.qubole.jdbcPort\"),\n      prop.getProperty(\"spark.qubole.thriftServer\"),\n      \"jdbc:teradata://\" + prop.getProperty(\"spark.qubole.jdbcHostname\") +  \"/LOGMECH\u003dTD2\"\n    )\n    kk.close();\n    return mydbproperties\n  }\n\n  \n  \n  def run(spark: SparkSession,propertiesobject : dbProperties, sqlQuery: String): DataFrame \u003d {\n    try { spark.read\n      .format(\"jdbc\")\n      .option(\"driver\", \"com.teradata.jdbc.TeraDriver\")\n      .option(\"url\", propertiesobject.dbUrl)\n      .option(\"user\", propertiesobject.jdbcUsername)\n      .option(\"password\", propertiesobject.jdbcPassword)\n      .option(\"fetchSize\", \"10000\")\n      .option(\"dbtable\", s\"($sqlQuery) t1\")\n      .load()\n    } catch {\n      case e: Exception \u003d\u003e {\n        println(\"Error executing \" + e.getMessage)\n        throw e\n      }\n    }\n  }\n   val propertiesobject \u003d  initproperties(\"hcom-data-prod-bix-meta\", \"tmp/quboleteradata.properties\")",
+      "user": "omateosventura@hotels.com",
+      "dateUpdated": "Oct 9, 2017 4:18:41 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "editorHide": false,
+        "tableHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499694635420_1206116755",
+      "id": "20170710-135035_915564589",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nimport com.amazonaws.services.s3.AmazonS3Client\n\nimport com.amazonaws.auth.InstanceProfileCredentialsProvider\n\nimport org.apache.spark.SparkConf\n\nimport java.util.Properties\n\nimport java.net.{URL, Socket, URI}\n\nimport org.apache.spark.sql.{DataFrame, SparkSession}\n\nimport org.apache.spark.rdd.RDD\n\nimport org.apache.spark.SparkContext\n\nimport org.apache.spark.SparkConf\n\nkk1: org.apache.spark.sql.DataFrame \u003d [key: string, value: string]\n\ndefined class dbProperties\n\ninitproperties: (bucket: String, s3key: String)dbProperties\n\nrun: (spark: org.apache.spark.sql.SparkSession, propertiesobject: dbProperties, sqlQuery: String)org.apache.spark.sql.DataFrame\n\npropertiesobject: dbProperties \u003d dbProperties(S-P_HWW_EXPAT ,Ft4@Df5tgy#453r# ,10.210.4.202,1025,thrift://internal-shared-hive-metastore-elb-550897717.us-west-2.elb.amazonaws.com:9083,jdbc:teradata://10.210.4.202/LOGMECH\u003dTD2)\n"
+      },
+      "dateCreated": "Jul 10, 2017 1:50:35 PM",
+      "dateStarted": "Jul 13, 2017 10:30:21 AM",
+      "dateFinished": "Jul 13, 2017 10:31:02 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "val kk1 \u003d spark.sql(\"\"\"set spark.sql.hive.convertMetastoreParquet\u003dfalse\"\"\")\nval df \u003d Seq(\"HCOM_LOYLTY_ACCOUNT_FIRST_TRANSACTION\",\"B\",\"C\").toDF(\"x\")\ndf.registerTempTable(\"table_name\")\nval Tablename \u003d z.select(\"Select Item\", Seq((\"RPT_HRW_LIABILITY_SNAPSHOT\",\"RPT_HRW_LIABILITY_SNAPSHOT\"),\n(\"RPT_HCOM_LOYLTY_POINT_AGG\",\"RPT_HCOM_LOYLTY_POINT_AGG\"),\n(\"RPT_HRW_LIABILITY_BLUEBOX_SNAPSHOT\",\"RPT_HRW_LIABILITY_BLUEBOX_SNAPSHOT\"),\n(\"RPT_HCOM_LOYLTY_REDEMP_AGG\",\"RPT_HCOM_LOYLTY_REDEMP_AGG\"),\n(\"HCOM_LOYLTY_REWARDS_CANCELLATION\",\"HCOM_LOYLTY_REWARDS_CANCELLATION\"),\n(\"HCOM_LOYLTY_ACCOUNT_FIRST_TRANSACTION\",\"HCOM_LOYLTY_ACCOUNT_FIRST_TRANSACTION\"),\n(\"HCOM_LOYLTY_REDEMP_TRANSACTION\",\"HCOM_LOYLTY_REDEMP_TRANSACTION\"),\n(\"HCOM_LOYLTY_ACCT_DIM\",\"HCOM_LOYLTY_ACCT_DIM\"),\n(\"HCOM_LOYLTY_TOWER_WATSON_REDEMPTION\",\"HCOM_LOYLTY_TOWER_WATSON_REDEMPTION\"),\n(\"HCOM_LOYLTY_TOWER_WATSON_ACCT_JOIN_CHANNEL\",\"HCOM_LOYLTY_TOWER_WATSON_ACCT_JOIN_CHANNEL\"),\n(\"HCOM_LOYLTY_TOWER_WATSON_ACCOUNT\",\"HCOM_LOYLTY_TOWER_WATSON_ACCOUNT\"),\n(\"HCOM_LOYLTY_TOWER_WATSON_REWARD\",\"HCOM_LOYLTY_TOWER_WATSON_REWARD\"),\n(\"HCOM_LOYLTY_POINT_TRANSACTION\",\"HCOM_LOYLTY_POINT_TRANSACTION\"),\n(\"HCOM_LOYLTY_REWARDS_CHECKOUT\",\"HCOM_LOYLTY_REWARDS_CHECKOUT\"),\n(\"HCOM_LOYLTY_TOWER_WATSON_POINT\",\"HCOM_LOYLTY_TOWER_WATSON_POINT\")))\nval tablas_td\u003drun(spark,propertiesobject,\"SELECT cast(etl_update_datetm as date) fecha, count(*)total_td FROM P_DM_HCOM_LOYLTY_REWARD.\"+ Tablename + \" GROUP BY cast(etl_update_datetm as date) \" ).cache\nval tablas_spark\u003dspark.sql(\"SELECT to_date(etl_update_datetm)fecha, count(*) total_sp FROM bix_ltas.\"+ Tablename + \" GROUP BY to_date(etl_update_datetm)\" ).cache\ntablas_td.show\ntablas_spark.show\ntablas_spark.join(tablas_td, tablas_spark(\"fecha\") \u003d\u003d\u003d tablas_td(\"fecha\")).filter(\"total_td \u003c\u003etotal_sp\").show",
+      "user": "omateosventura@hotels.com",
+      "dateUpdated": "Jul 13, 2017 10:34:15 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "tableHide": false,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {
+          "name": "hola",
+          "Select Item": "HCOM_LOYLTY_REWARDS_CHECKOUT"
+        },
+        "forms": {
+          "Select Item": {
+            "name": "Select Item",
+            "displayName": "Select Item",
+            "type": "select",
+            "defaultValue": "",
+            "options": [
+              {
+                "value": "RPT_HRW_LIABILITY_SNAPSHOT",
+                "displayName": "RPT_HRW_LIABILITY_SNAPSHOT"
+              },
+              {
+                "value": "RPT_HCOM_LOYLTY_POINT_AGG",
+                "displayName": "RPT_HCOM_LOYLTY_POINT_AGG"
+              },
+              {
+                "value": "RPT_HRW_LIABILITY_BLUEBOX_SNAPSHOT",
+                "displayName": "RPT_HRW_LIABILITY_BLUEBOX_SNAPSHOT"
+              },
+              {
+                "value": "RPT_HCOM_LOYLTY_REDEMP_AGG",
+                "displayName": "RPT_HCOM_LOYLTY_REDEMP_AGG"
+              },
+              {
+                "value": "HCOM_LOYLTY_REWARDS_CANCELLATION",
+                "displayName": "HCOM_LOYLTY_REWARDS_CANCELLATION"
+              },
+              {
+                "value": "HCOM_LOYLTY_ACCOUNT_FIRST_TRANSACTION",
+                "displayName": "HCOM_LOYLTY_ACCOUNT_FIRST_TRANSACTION"
+              },
+              {
+                "value": "HCOM_LOYLTY_REDEMP_TRANSACTION",
+                "displayName": "HCOM_LOYLTY_REDEMP_TRANSACTION"
+              },
+              {
+                "value": "HCOM_LOYLTY_ACCT_DIM",
+                "displayName": "HCOM_LOYLTY_ACCT_DIM"
+              },
+              {
+                "value": "HCOM_LOYLTY_TOWER_WATSON_REDEMPTION",
+                "displayName": "HCOM_LOYLTY_TOWER_WATSON_REDEMPTION"
+              },
+              {
+                "value": "HCOM_LOYLTY_TOWER_WATSON_ACCT_JOIN_CHANNEL",
+                "displayName": "HCOM_LOYLTY_TOWER_WATSON_ACCT_JOIN_CHANNEL"
+              },
+              {
+                "value": "HCOM_LOYLTY_TOWER_WATSON_ACCOUNT",
+                "displayName": "HCOM_LOYLTY_TOWER_WATSON_ACCOUNT"
+              },
+              {
+                "value": "HCOM_LOYLTY_TOWER_WATSON_REWARD",
+                "displayName": "HCOM_LOYLTY_TOWER_WATSON_REWARD"
+              },
+              {
+                "value": "HCOM_LOYLTY_POINT_TRANSACTION",
+                "displayName": "HCOM_LOYLTY_POINT_TRANSACTION"
+              },
+              {
+                "value": "HCOM_LOYLTY_REWARDS_CHECKOUT",
+                "displayName": "HCOM_LOYLTY_REWARDS_CHECKOUT"
+              },
+              {
+                "value": "HCOM_LOYLTY_TOWER_WATSON_POINT",
+                "displayName": "HCOM_LOYLTY_TOWER_WATSON_POINT"
+              }
+            ],
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1499695880817_-1124484645",
+      "id": "20170710-141120_1209579055",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "\nkk1: org.apache.spark.sql.DataFrame \u003d [key: string, value: string]\n\ndf: org.apache.spark.sql.DataFrame \u003d [x: string]\n\nwarning: there was one deprecation warning; re-run with -deprecation for details\n\nTablename: Object \u003d HCOM_LOYLTY_REWARDS_CHECKOUT\n\ntablas_td: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] \u003d [fecha: date, total_td: int]\n\ntablas_spark: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] \u003d [fecha: date, total_sp: bigint]\n+----------+--------+\n|     fecha|total_td|\n+----------+--------+\n|2016-04-15|  206335|\n|2017-04-23|  283518|\n|2016-11-18|  231642|\n|2016-05-29|  253555|\n|2016-10-29|  291690|\n|2016-04-14|  180528|\n|2016-01-21|  153719|\n|2016-11-12|  273020|\n|2016-11-02|  199170|\n|2016-11-25|  195608|\n|2015-12-31|  284424|\n|2017-06-25|  316000|\n|2017-03-28|  246699|\n|2017-04-17|  472424|\n|2016-07-20|  256584|\n|2017-04-07|  257708|\n|2016-10-24|  456269|\n|2017-01-19|  185439|\n|2016-08-07|  316255|\n|2016-12-07|  168372|\n+----------+--------+\nonly showing top 20 rows\n\n+----------+--------+\n|     fecha|total_sp|\n+----------+--------+\n|2016-03-01|  206859|\n|2016-04-25|  413952|\n|2017-01-06|  210621|\n|2015-12-22|  189573|\n|2016-08-15|  473469|\n|2016-05-03|  246645|\n|2016-07-26|  317830|\n|2016-10-03|  432120|\n|2016-08-31|  203459|\n|2016-01-28|  160648|\n|2017-01-27|  216736|\n|2017-02-26|  267706|\n|2016-07-17|  320797|\n|2016-11-08|  219562|\n|2016-12-19|  335271|\n|2017-01-24|  198754|\n|2016-07-03|  277791|\n|2016-08-23|  265073|\n|2017-06-29|  289785|\n|2017-02-16|  224962|\n+----------+--------+\nonly showing top 20 rows\n\n+-----+--------+-----+--------+\n|fecha|total_sp|fecha|total_td|\n+-----+--------+-----+--------+\n+-----+--------+-----+--------+\n\n"
+      },
+      "dateCreated": "Jul 10, 2017 2:11:20 PM",
+      "dateStarted": "Jul 13, 2017 10:34:15 AM",
+      "dateFinished": "Jul 13, 2017 10:35:14 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1499766086900_-644039262",
+      "id": "20170711-094126_110964193",
+      "dateCreated": "Jul 11, 2017 9:41:26 AM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Td_DQ",
+  "id": "JRK22EPQ4X1499694634",
+  "angularObjects": {
+    "2CX8NXR5W284781509408450107:shared_process": [],
+    "2CZMF82TA284781509408275486:shared_process": [],
+    "2CX1FUJ2W284781509408275489:shared_process": [],
+    "2CYYJU5TM284781509408275491:shared_process": []
+  },
+  "config": {
+    "isDashboard": false
+  },
+  "info": {},
+  "source": "FCN"
+}
