@@ -1,0 +1,134 @@
+{
+  "paragraphs": [
+    {
+      "text": "\nval newNamesEDWReport \u003d Seq(\"edw_user_email\", \"query_date\", \"numberofqueries\", \"average_time_in_mins\")\nval edwreport \u003d spark.read.option(\"header\", \"false\").option(\"inferSchema\",\"true\")\n      .csv(\"s3://hcom-data-prod-bix-meta/qubole/edw_usage_report_90day\").toDF(newNamesEDWReport: _*)\n      \n\n",
+      "user": "sanjones@expedia.com",
+      "dateUpdated": "Apr 18, 2017 10:45:37 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1489771055192_-1103923445",
+      "id": "20170317-171735_1225713281",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "newNamesEDWReport: Seq[String] \u003d List(edw_user_email, query_date, numberofqueries, average_time_in_mins)\nedwreport: org.apache.spark.sql.DataFrame \u003d [edw_user_email: string, query_date: string ... 2 more fields]\n"
+      },
+      "dateCreated": "Mar 17, 2017 5:17:35 PM",
+      "dateStarted": "Apr 18, 2017 10:45:37 AM",
+      "dateFinished": "Apr 18, 2017 10:45:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "edwreport.createOrReplaceTempView(\"v_edwreport\")",
+      "user": "sanjones@expedia.com",
+      "dateUpdated": "Apr 18, 2017 10:47:10 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1489771205547_961975646",
+      "id": "20170317-172005_436530443",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Mar 17, 2017 5:20:05 PM",
+      "dateStarted": "Apr 18, 2017 10:47:10 AM",
+      "dateFinished": "Apr 18, 2017 10:47:10 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "spark.sql(\"select * from v_edwreport a inner join bix_common.hermes_site_dim on 1\u003d1\").show()",
+      "user": "sanjones@expedia.com",
+      "dateUpdated": "Apr 18, 2017 10:49:01 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1492512430364_616941501",
+      "id": "20170418-104710_2027532112",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+----------+---------------+--------------------+------+-----------------------+-----------------+-----------------+---------------------+---------------------+------------------+----------------------+--------------------+--------------------+---------------+-----------------------+--------------------+----------+\n|      edw_user_email|query_date|numberofqueries|average_time_in_mins|   cid|site_short_country_code|site_country_code|site_country_name|site_iso_country_name|site_country_timezone|  site_region_name|site_super_region_name|mobile_platform_name|mobile_app_indicator|mobile_app_name|mobile_device_type_name|         timezone_id|brand_name|\n+--------------------+----------+---------------+--------------------+------+-----------------------+-----------------+-----------------+---------------------+---------------------+------------------+----------------------+--------------------+--------------------+---------------+-----------------------+--------------------+----------+\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|500877|                     CA|              CAN|           Canada|               Canada|                  PST|            Canada|                    NA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|     America/Toronto|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|500878|                     CA|              CAN|           Canada|               Canada|                  PST|            Canada|                    NA|              Mobile|          Mobile Web|        Unknown|                Unknown|     America/Toronto|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|500881|                     GB|              GBR|   United Kingdom|       United Kingdom|                  WET|    UK and Ireland|                  EMEA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|       Europe/London|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|500883|                     GB|              GBR|   United Kingdom|       United Kingdom|                  WET|    UK and Ireland|                  EMEA|              Mobile|          Mobile Web|        Unknown|                Unknown|       Europe/London|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|122615|                     US|              USA|               US| United States of ...|                  PST|                US|                    NA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable| America/Los_Angeles|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|342152|                     DE|              DEU|          Germany|              Germany|                  CET|   German Speaking|                  EMEA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|       Europe/Berlin|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|344850|                     US|              USA|               US| United States of ...|                  PST|                US|                    NA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable| America/Los_Angeles|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457538|                     AR|              ARG|        Argentina|            Argentina|                  BRT|              ROLA|                 LatAm|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|America/Buenos_Aires|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457539|                     AR|              ARG|        Argentina|            Argentina|                  BRT|              ROLA|                 LatAm|              Mobile|          Mobile Web|        Unknown|                Unknown|America/Buenos_Aires|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457543|                     BE|              BEL|          Belgium|              Belgium|                  CET|France and Benelux|                  EMEA|              Mobile|          Mobile Web|        Unknown|                Unknown|     Europe/Brussels|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457587|                     CH|              CHE|      Switzerland|          Switzerland|                  CET|   German Speaking|                  EMEA|              Mobile|          Mobile Web|        Unknown|                Unknown|       Europe/Zurich|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457548|                     CO|              COL|         Colombia|             Colombia|                  BRT|              ROLA|                 LatAm|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|      America/Bogota|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457549|                     CO|              COL|         Colombia|             Colombia|                  BRT|              ROLA|                 LatAm|              Mobile|          Mobile Web|        Unknown|                Unknown|      America/Bogota|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457588|                     DE|              DEU|          Germany|              Germany|                  CET|   German Speaking|                  EMEA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|       Europe/Berlin|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457589|                     DE|              DEU|          Germany|              Germany|                  CET|   German Speaking|                  EMEA|              Mobile|          Mobile Web|        Unknown|                Unknown|       Europe/Berlin|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457558|                     GR|              GRC|           Greece|               Greece|                  EET|       New Markets|                  EMEA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|       Europe/Athens|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457559|                     GR|              GRC|           Greece|               Greece|                  EET|       New Markets|                  EMEA|              Mobile|          Mobile Web|        Unknown|                Unknown|       Europe/Athens|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457564|                     IE|              IRL|          Ireland|              Ireland|                  WET|    UK and Ireland|                  EMEA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|       Europe/Dublin|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457590|                     TR|              TUR|           Turkey|               Turkey|                  EET|       New Markets|                  EMEA|      Not Applicable|      Not Applicable| Not Applicable|         Not Applicable|     Europe/Istanbul|      HCOM|\n|embidetl@expedia.com| 11/8/2016|           3340|               1.836|457591|                     TR|              TUR|           Turkey|               Turkey|                  EET|       New Markets|                  EMEA|              Mobile|          Mobile Web|        Unknown|                Unknown|     Europe/Istanbul|      HCOM|\n+--------------------+----------+---------------+--------------------+------+-----------------------+-----------------+-----------------+---------------------+---------------------+------------------+----------------------+--------------------+--------------------+---------------+-----------------------+--------------------+----------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Apr 18, 2017 10:47:10 AM",
+      "dateStarted": "Apr 18, 2017 10:49:01 AM",
+      "dateFinished": "Apr 18, 2017 10:49:08 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1492512455549_-483024957",
+      "id": "20170418-104735_1495651843",
+      "dateCreated": "Apr 18, 2017 10:47:35 AM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "csv_reader_header",
+  "id": "8G3TQT7Y8N1489771048",
+  "angularObjects": {
+    "2CX8NXR5W284781509408450107:shared_process": [],
+    "2CZMF82TA284781509408275486:shared_process": [],
+    "2CX1FUJ2W284781509408275489:shared_process": [],
+    "2CYYJU5TM284781509408275491:shared_process": []
+  },
+  "config": {
+    "isDashboard": false
+  },
+  "info": {},
+  "source": "FCN"
+}
